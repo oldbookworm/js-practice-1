@@ -362,14 +362,22 @@ function getBiggerPhoto() {
 
 const effectSlider = document.querySelector('.effect-level__slider');
 
+// поле, в которое записывается значение ползунка
+const effectValue = document.querySelector('.effect-level__value');
 
 noUiSlider.create(effectSlider, {
-    start: 50,
-    connect: true,
-    range: {
-        'min': 0,
-        'max': 100,
-    }
+  start: 0,
+  connect: 'lower',
+  step: 0.1,
+  range: {
+    'min': 0,
+  'max': 100,
+  }
+});
+
+effectSlider.noUiSlider.on('update', (values, handle) => {
+  effectValue.value = values[handle];
+  addEffectRange(values[handle]);
 });
 
 // ПЕРЕКЛЮЧЕНИЕ ЭФФЕКТОВ
@@ -380,18 +388,43 @@ const effectsList = document.querySelector('.effects__list');
 
 effectsList.addEventListener('click', (evt) => {
   evt.stopPropagation();
-  removeEffectClass();
+  removeEffects();
   const targetEffect = event.target.closest('input').value;
   addEffectClass(targetEffect);
 });
 
 // удаляем эффекты при переключении оставляя только базовый класс
-function removeEffectClass() {
+function removeEffects() {
   uploadPhoto.className = 'img-upload__preview';
+  uploadPhoto.id = '';
+  uploadPhoto.style = '';
 }
 
 function addEffectClass(effect) {
   const effectClass = `effects__preview--${effect}`;
   uploadPhoto.classList.add(effectClass);
+  uploadPhoto.id = effect;
+}
 
+function addEffectRange(val=0) {
+  const effect = uploadPhoto.id;
+  switch (effect) {
+  case 'chrome':
+  uploadPhoto.style.filter = `grayscale(${val})`;
+  break;
+  case 'sepia':
+  uploadPhoto.style.filter = `sepia(${val})`;
+  break;
+  case 'marvin':
+  uploadPhoto.style.filter = `invert(${val})`;
+  break;
+  case 'phobos':
+  uploadPhoto.style.filter = `blur(${val})`;
+  break;
+  case 'heat':
+  uploadPhoto.style.filter = `brightness(${val})`;
+  break;
+  default:
+  uploadPhoto.style = "";
+  }
 }
