@@ -370,10 +370,11 @@ noUiSlider.create(effectSlider, {
   connect: 'lower',
   step: 0.1,
   range: {
-    'min': 0,
-  'max': 100,
+  'min': 0,
+  'max': 1,
   }
 });
+
 
 effectSlider.noUiSlider.on('update', (values, handle) => {
   effectValue.value = values[handle];
@@ -385,12 +386,22 @@ effectSlider.noUiSlider.on('update', (values, handle) => {
 // список с эффектами
 const effectsList = document.querySelector('.effects__list');
 
+function isNoneEffect(target) {
+  const effect = uploadPhoto.id;
+  if (effect === 'none' || target === 'none') {
+    effectSlider.classList.add('hidden');
+  } else effectSlider.classList.remove('hidden');
+};
+
+isNoneEffect();
 
 effectsList.addEventListener('click', (evt) => {
   evt.stopPropagation();
   removeEffects();
   const targetEffect = event.target.closest('input').value;
   addEffectClass(targetEffect);
+  setSliderOption(targetEffect);
+  isNoneEffect(targetEffect);
 });
 
 // удаляем эффекты при переключении оставляя только базовый класс
@@ -398,6 +409,7 @@ function removeEffects() {
   uploadPhoto.className = 'img-upload__preview';
   uploadPhoto.id = '';
   uploadPhoto.style = '';
+  effectSlider.noUiSlider.set(0);
 }
 
 function addEffectClass(effect) {
@@ -406,25 +418,64 @@ function addEffectClass(effect) {
   uploadPhoto.id = effect;
 }
 
-function addEffectRange(val=0) {
+function addEffectRange(val) {
   const effect = uploadPhoto.id;
   switch (effect) {
   case 'chrome':
-  uploadPhoto.style.filter = `grayscale(${val})`;
+    uploadPhoto.style.filter = `grayscale(${val})`;
   break;
   case 'sepia':
   uploadPhoto.style.filter = `sepia(${val})`;
   break;
   case 'marvin':
-  uploadPhoto.style.filter = `invert(${val})`;
+    uploadPhoto.style.filter = `invert(${val}%)`;
   break;
   case 'phobos':
-  uploadPhoto.style.filter = `blur(${val})`;
+    uploadPhoto.style.filter = `blur(${val}px)`;
   break;
   case 'heat':
-  uploadPhoto.style.filter = `brightness(${val})`;
+    uploadPhoto.style.filter = `brightness(${val})`;
   break;
   default:
   uploadPhoto.style = "";
   }
 }
+
+function setSliderOption(option) {
+  console.log(option);
+  if (option === 'marvin') {
+    effectSlider.noUiSlider.updateOptions ({
+    range: {
+      min: 0,
+      max: 100,
+    },
+    step: 1,
+    });
+  } else if (option === 'phobos') {
+    effectSlider.noUiSlider.updateOptions ({
+    range: {
+      min: 0,
+      max: 3,
+    },
+    step: 0.1,
+    });
+  } else if (option === 'heat') {
+    effectSlider.noUiSlider.updateOptions ({
+    range: {
+      min: 1,
+      max: 3,
+    },
+    step: 0.1,
+    });
+  } else if (option === 'chrome' || option === 'sepia') {
+    effectSlider.noUiSlider.updateOptions ({
+    range: {
+      min: 0,
+      max: 1,
+    },
+    step: 0.1,
+    });
+} 
+};
+
+
