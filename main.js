@@ -276,6 +276,7 @@ function closeChangerModal() {
 // Открытие по клику
 uploadPhotoForm.addEventListener('click', (evt) => {
   evt.preventDefault();
+  isNoneEffect();
   const targetPoint = event.target.closest('form');
   openChangerPhotoModal(targetPoint);
 });
@@ -285,6 +286,7 @@ uploadPhotoForm.addEventListener('click', (evt) => {
 uploadPhotoForm.addEventListener('keydown', (evt) => {
   if (isEnterEvent (evt)) {
     evt.preventDefault();
+    isNoneEffect();
     const targetPoint = event.target.closest('form');
     openChangerPhotoModal(targetPoint);
   }
@@ -295,6 +297,7 @@ uploadPhotoForm.addEventListener('keydown', (evt) => {
 changerModalCloseBtn.addEventListener('click', (evt) => {
   evt.preventDefault();
   evt.stopPropagation();
+  removeEffects();
   closeChangerModal();
 });
 
@@ -302,6 +305,7 @@ changerModalCloseBtn.addEventListener('click', (evt) => {
  document.addEventListener('keydown', (evt) => {
     if (isEscEvent (evt)) {
     evt.preventDefault();
+    removeEffects();
     closeChangerModal();
   };
   });
@@ -339,7 +343,7 @@ function getSmallerPhoto() {
 
   if (smallerValue != 25) {
     smallerValue = smallerValue - STEP;
-    scaleValue.value =  smallerValue;
+    scaleValue.value =  smallerValue + '%';
     uploadPhoto.style.transform = `scale(0.${smallerValue})`;
   } 
 }
@@ -350,7 +354,7 @@ function getBiggerPhoto() {
 
    if (biggerValue != 100) {
     biggerValue = biggerValue + STEP;
-    scaleValue.value =  biggerValue;
+    scaleValue.value =  biggerValue + '%';
       if (biggerValue == 100) {
     uploadPhoto.style.transform = 'scale(1)';  
   }else uploadPhoto.style.transform = `scale(0.${biggerValue})`;
@@ -360,11 +364,13 @@ function getBiggerPhoto() {
 
 // СЛАЙДЕР
 
+// слайдер
 const effectSlider = document.querySelector('.effect-level__slider');
 
 // поле, в которое записывается значение ползунка
 const effectValue = document.querySelector('.effect-level__value');
 
+// создаем слайдер
 noUiSlider.create(effectSlider, {
   start: 0,
   connect: 'lower',
@@ -375,26 +381,20 @@ noUiSlider.create(effectSlider, {
   }
 });
 
-
+// получаем и передаем значения ползунка
 effectSlider.noUiSlider.on('update', (values, handle) => {
   effectValue.value = values[handle];
   addEffectRange(values[handle]);
 });
 
-// ПЕРЕКЛЮЧЕНИЕ ЭФФЕКТОВ
 
 // список с эффектами
 const effectsList = document.querySelector('.effects__list');
 
-function isNoneEffect(target) {
-  const effect = uploadPhoto.id;
-  if (effect === 'none' || target === 'none') {
-    effectSlider.classList.add('hidden');
-  } else effectSlider.classList.remove('hidden');
-};
-
-isNoneEffect();
-
+// при клике на эффект, удаляем предыдущие эффекты
+// добавляем текущий эффект
+// устанавиливаем настройки слайдера
+// проверяем не выбран ли оригинал
 effectsList.addEventListener('click', (evt) => {
   evt.stopPropagation();
   removeEffects();
@@ -404,20 +404,31 @@ effectsList.addEventListener('click', (evt) => {
   isNoneEffect(targetEffect);
 });
 
-// удаляем эффекты при переключении оставляя только базовый класс
-function removeEffects() {
-  uploadPhoto.className = 'img-upload__preview';
-  uploadPhoto.id = '';
-  uploadPhoto.style = '';
-  effectSlider.noUiSlider.set(0);
-}
+// если оригинал, то скрываем слайдер
+function isNoneEffect(target) {
+  const effect = uploadPhoto.id;
+  if (effect === 'none' || target === 'none') {
+    effectSlider.classList.add('hidden');
+  } else effectSlider.classList.remove('hidden');
+};
 
+// добавляем класс и айди с эффектом
 function addEffectClass(effect) {
   const effectClass = `effects__preview--${effect}`;
   uploadPhoto.classList.add(effectClass);
   uploadPhoto.id = effect;
 }
 
+// удаляем все эффекты при переключении оставляя только базовый класс
+function removeEffects() {
+  uploadPhoto.className = 'img-upload__preview';
+  uploadPhoto.id = '';
+  uploadPhoto.style = '';
+  effectSlider.noUiSlider.set(0);
+  scaleValue.value =  100 + '%';
+}
+
+// проверяем айди эффекта и добавляем фото нужные стили со значением ползунка
 function addEffectRange(val) {
   const effect = uploadPhoto.id;
   switch (effect) {
@@ -441,6 +452,7 @@ function addEffectRange(val) {
   }
 }
 
+// выставляем настройки слайдера в зависимости от выбранного эффекта
 function setSliderOption(option) {
   console.log(option);
   if (option === 'marvin') {
@@ -479,3 +491,4 @@ function setSliderOption(option) {
 };
 
 
+// ВАЛИДАЦИЯ ФОРМЫ
