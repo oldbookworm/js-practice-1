@@ -492,3 +492,75 @@ function setSliderOption(option) {
 
 
 // ВАЛИДАЦИЯ ФОРМЫ
+
+// инпут с хэштегами
+const hashtagForm = document.querySelector('.text__hashtags');
+// кнопка сабмит
+const submitBtn = document.querySelector('.img-upload__submit');
+
+hashtagForm.addEventListener('change', (evt) => {
+  evt.stopPropagation();
+  evt.preventDefault();
+  // получаем хэшированную строку
+  // join для того чтобы строка объединялась пробелами а не запятыми
+  const hashed = validateHash(hashtagForm.value).join(' ');
+  hashtagForm.value = hashed;
+
+  hashtagForm.reportValidity();
+});
+
+
+
+function validateHash(str) {
+  const inHashArr = str.split(" ");
+  const outHashArr = [];
+
+  for (let i=0; i < inHashArr.length; i++) {
+
+    if(inHashArr[i].length < 2) {
+
+      hashtagForm.setCustomValidity("хэштег должен быть длиной не менее 2 символов");
+      continue;
+
+    } else if (inHashArr[i].length > 10) {
+
+      hashtagForm.setCustomValidity("хэштег не должен превышать 10 символов");
+      continue;
+
+    } else if (inHashArr[i].match(/^\S+$/) && inHashArr[i].match(/^[а-яА-ЯёЁa-zA-Z0-9]+$/)) {
+      let newStr = "#" + inHashArr[i];
+      outHashArr.push(newStr);
+    } else {
+      hashtagForm.setCustomValidity("в хэштеге должны использовться только буквы и цифры");
+    }
+  }
+
+  return getUnique(outHashArr);
+};
+
+
+function getUnique(arr) {
+  let result = [];
+  for (let str of arr) {
+    if (!result.includes(str)) {
+      result.push(str);
+    }
+  }
+  
+  checkHashtagsNumber(result);
+  return result;
+}
+
+
+function checkHashtagsNumber(arr) {
+  if(arr.length > 4) {
+    hashtagForm.setCustomValidity("не больше 5 хештегов");
+    reportHashtagError();
+  }
+}
+
+// function reportHashtagError() {
+//   hashtagForm.style.border = "2px solid red";
+//   submitBtn.disabled = true;
+// }
+
