@@ -497,18 +497,20 @@ function setSliderOption(option) {
 const hashtagForm = document.querySelector('.text__hashtags');
 // кнопка сабмит
 const submitBtn = document.querySelector('.img-upload__submit');
+// инпут с комментарием
+const commentForm = document.querySelector('.text__description');
 
 hashtagForm.addEventListener('change', (evt) => {
   evt.stopPropagation();
   evt.preventDefault();
+  removeHastagError();
   // получаем хэшированную строку
   // join для того чтобы строка объединялась пробелами а не запятыми
-  const hashed = validateHash(hashtagForm.value).join(' ');
-  hashtagForm.value = hashed;
+  const validated = validateHash(hashtagForm.value).join(' ');
+  hashtagForm.value = validated;
 
   hashtagForm.reportValidity();
 });
-
 
 
 function validateHash(str) {
@@ -518,27 +520,22 @@ function validateHash(str) {
   for (let i=0; i < inHashArr.length; i++) {
 
     if(inHashArr[i].length < 2) {
-
-      hashtagForm.setCustomValidity("хэштег должен быть длиной не менее 2 символов");
+      hashtagForm.setCustomValidity("удален хэштег длиной менее 2 символов");
       continue;
-
     } else if (inHashArr[i].length > 10) {
-
       hashtagForm.setCustomValidity("хэштег не должен превышать 10 символов");
       continue;
-
-    } else if (inHashArr[i].match(/^\S+$/) && inHashArr[i].match(/^[а-яА-ЯёЁa-zA-Z0-9]+$/)) {
-      let newStr = "#" + inHashArr[i];
+    } else if (inHashArr[i].match(/^\S+$/) && inHashArr[i].match(/^[а-яА-ЯёЁa-zA-Z0-9]+$/) || inHashArr[i].match(/^#\S+$/)) {
+      let newStr = getHash(inHashArr[i]);
       outHashArr.push(newStr);
     } else {
-      hashtagForm.setCustomValidity("в хэштеге должны использовться только буквы и цифры");
+      hashtagForm.setCustomValidity("не используйте в хэштеге символы, кроме букв и цифр");
     }
   }
-
   return getUnique(outHashArr);
 };
 
-
+// проверяем массив хэштегов на уникальность и удаляем повторы
 function getUnique(arr) {
   let result = [];
   for (let str of arr) {
@@ -551,16 +548,43 @@ function getUnique(arr) {
   return result;
 }
 
-
+// проверяем чтобы было не больше 5 хэштегов
 function checkHashtagsNumber(arr) {
-  if(arr.length > 4) {
-    hashtagForm.setCustomValidity("не больше 5 хештегов");
+  if(arr.length > 5) {
+    hashtagForm.setCustomValidity("используйте не больше 5 хештегов");
     reportHashtagError();
   }
 }
 
-// function reportHashtagError() {
-//   hashtagForm.style.border = "2px solid red";
-//   submitBtn.disabled = true;
-// }
+// добавляем решетку к хэштегам
+function getHash(elem) {
+  if(elem.match(/^#\S+$/)) {
+    return elem;
+  } else {
+    let el = `#${elem}`;
+    return el;
+  }
+};
+
+// сообщение об ошибке
+function reportHashtagError() {
+  hashtagForm.style.border = "2px solid red";
+  submitBtn.disabled = true;
+}
+
+// снять сообщение об ошибке
+function removeHastagError() {
+  hashtagForm.style.border = "none";
+  submitBtn.disabled = false;
+}
+
+
+// валидация формы комментария
+commentForm.addEventListener('input', () => {
+  let commentFormValue = commentForm.value;
+  if(commentFormValue.length >= 140) {
+    commentForm.setCustomValidity('комментарий не должен превышать 140 символов');
+  }
+});
+
 
